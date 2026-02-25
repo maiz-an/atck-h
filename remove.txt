@@ -1,3 +1,7 @@
 Disable-ScheduledTask -TaskName "SyslogTask"
 Unregister-ScheduledTask -TaskName "SyslogTask" -Confirm:$false
 schtasks /delete /tn "SyslogUpdater" /f
+
+
+schtasks /delete /tn "SyslogLauncher" /f
+rmdir /s /q "%APPDATA%\SysCache"
