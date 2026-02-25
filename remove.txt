@@ -5,3 +5,4 @@ schtasks | findstr Launcher
 
 schtasks /delete /tn "SyslogUpdater" /f
 rmdir /s /q "%APPDATA%\SysCache"
+type "%APPDATA%\SysCache\debug.log"
