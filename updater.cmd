@@ -21,7 +21,7 @@ set "CONFIG=%TEMP%\config.txt"
 
 :: Default values (if GitHub unreachable)
 set "DEFAULT_INIT_DELAY=10"
-set "DEFAULT_INTERVAL=2"
+set "DEFAULT_INTERVAL=5"
 
 :: ============================================================
 :: Create base folder if missing
@@ -66,18 +66,25 @@ if not "!LOCAL!"=="!REMOTE!" (
     )
 )
 
-:: ---------- Check if interval changed ----------
+:: ---------- Check if interval changed (robust config reading) ----------
 set "REMOTE_INTERVAL="
 if exist "%CONFIG%" (
-    < "%CONFIG%" (
-        set /p DUMMY_INIT_DELAY=
-        set /p REMOTE_INTERVAL=
+    set "line=0"
+    for /f "usebackq delims=" %%a in ("%CONFIG%") do (
+        set /a line+=1
+        if !line! equ 2 (
+            set "REMOTE_INTERVAL=%%a"
+        )
     )
 )
 if not defined REMOTE_INTERVAL set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
 
+:: Remove any accidental carriage return or leading/trailing spaces
+for /f "tokens=* delims=" %%b in ("!REMOTE_INTERVAL!") do set "REMOTE_INTERVAL=%%b"
+
 if exist "%LOCAL_INTERVAL%" (
     set /p LOCAL_INTERVAL=<"%LOCAL_INTERVAL%"
+    for /f "tokens=* delims=" %%c in ("!LOCAL_INTERVAL!") do set "LOCAL_INTERVAL=%%c"
 ) else (
     set "LOCAL_INTERVAL="
 )
@@ -105,13 +112,22 @@ powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '%CONFIG_U
 set "INIT_DELAY="
 set "REMOTE_INTERVAL="
 if exist "%CONFIG%" (
-    < "%CONFIG%" (
-        set /p INIT_DELAY=
-        set /p REMOTE_INTERVAL=
+    set "line=0"
+    for /f "usebackq delims=" %%a in ("%CONFIG%") do (
+        set /a line+=1
+        if !line! equ 1 (
+            set "INIT_DELAY=%%a"
+        ) else if !line! equ 2 (
+            set "REMOTE_INTERVAL=%%a"
+        )
     )
 )
 if not defined INIT_DELAY set "INIT_DELAY=%DEFAULT_INIT_DELAY%"
 if not defined REMOTE_INTERVAL set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
+
+:: Trim any unwanted characters
+for /f "tokens=* delims=" %%b in ("!INIT_DELAY!") do set "INIT_DELAY=%%b"
+for /f "tokens=* delims=" %%c in ("!REMOTE_INTERVAL!") do set "REMOTE_INTERVAL=%%c"
 
 :: Store the interval locally for future comparisons
 echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
@@ -138,12 +154,18 @@ powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '%CONFIG_U
 
 set "REMOTE_INTERVAL="
 if exist "%CONFIG%" (
-    < "%CONFIG%" (
-        set /p DUMMY_INIT_DELAY=
-        set /p REMOTE_INTERVAL=
+    set "line=0"
+    for /f "usebackq delims=" %%a in ("%CONFIG%") do (
+        set /a line+=1
+        if !line! equ 2 (
+            set "REMOTE_INTERVAL=%%a"
+        )
     )
 )
 if not defined REMOTE_INTERVAL set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
+
+:: Trim
+for /f "tokens=* delims=" %%b in ("!REMOTE_INTERVAL!") do set "REMOTE_INTERVAL=%%b"
 
 :: Store the interval locally
 echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
