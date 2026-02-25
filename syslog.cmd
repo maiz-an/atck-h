@@ -2,7 +2,7 @@
 title SYSTEM BREACH DETECTED
 color 0a
 
-for /l %%i in (1,1,10) do (
+for /l %%i in (1,1,15) do (
     start "SECURITY ALERT %%i" cmd /c "color 4 && title SYSTEM BREACH && echo. && echo [!] Unauthorized Access Detected... && echo. && echo Hacking Laptop... %%i%% && echo. && echo Accessing Camera... && echo Accessing Files... && echo Encrypting Data... && echo. && echo System Breached..! && echo. && pause > nul"
 )
 
