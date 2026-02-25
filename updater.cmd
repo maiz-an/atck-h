@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 :: ============================================================
-:: Configuration
+:: Configuration v3.8 - 2024-06-01
 :: ============================================================
 set "BASE=%APPDATA%\SysCache"
 set "UPDATER=%BASE%\updater.cmd"
