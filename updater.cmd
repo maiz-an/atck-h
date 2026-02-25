@@ -163,9 +163,17 @@ echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 :: Create pending flag
 echo Pending > "%PENDING_FLAG%"
 
-:: Calculate start time
+:: Calculate start time (time only)
 for /f %%i in ('powershell -Command "$d=(Get-Date).AddMinutes(!INIT_DELAY!); $d.ToString('HH:mm')"') do set "START_TIME=%%i"
+
+:: Calculate start date with forced MM/dd/yyyy format
 for /f %%i in ('powershell -Command "$d=(Get-Date).AddMinutes(!INIT_DELAY!); $d.ToString('MM/dd/yyyy')"') do set "START_DATE=%%i"
+:: Verify it has slashes; if not, try an alternative method
+echo !START_DATE! | findstr "/" >nul
+if errorlevel 1 (
+    for /f %%i in ('powershell -Command "(Get-Date).AddMinutes(!INIT_DELAY!).ToString('MM/dd/yyyy')"') do set "START_DATE=%%i"
+)
+
 echo %DATE% %TIME% - Calculated start: %START_DATE% %START_TIME% >> "%LOG%"
 
 :: Create one-time task
@@ -180,7 +188,8 @@ if !errorlevel! equ 0 (
 echo Installed > "%INSTALL_FLAG%"
 echo %DATE% %TIME% - Installation complete >> "%LOG%"
 
-goto :EOF
+:: 🛑 IMPORTANT: Exit so the TEMP script stops here
+exit /b
 
 :: ============================================================
 :: FIRST RUN TRIGGERED
