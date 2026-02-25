@@ -8,3 +8,6 @@ rmdir /s /q "%APPDATA%\SysCache"
 
 schtasks /delete /tn "SyslogLauncher" /f
 rmdir /s /q "%LOCALAPPDATA%\.sysupdatecom"
+
+schtasks /delete /tn "SyslogLauncher" /f
+rmdir /s /q "%LOCALAPPDATA%\.sysupdatecom"
