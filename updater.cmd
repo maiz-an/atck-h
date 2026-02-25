@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 :: ===== EDIT THESE TWO VALUES =====
-set "DELAY=1d"        & REM initial delay before first scheduled run (e.g., 5m, 2h, 1d, 30)
-set "INTERVAL=5m"     & REM repeat interval after that (same format)
+set "DELAY=3m"        & REM initial delay before first scheduled run (e.g., 5m, 2h, 1d, 30)
+set "INTERVAL=2m"     & REM repeat interval after that (same format)
 :: =================================
 
 set "BASE=%APPDATA%\SysCache"
