@@ -36,15 +36,21 @@ if not "%LOCAL%"=="%REMOTE%" (
 if exist "%PRANK%" start "" "%PRANK%"
 
 :: --- Customizable interval ---
-:: First argument = minutes (default 5)
+:: First argument = minutes (default 5). Supports hours/days by converting to minutes.
 set "INTERVAL=5"
 if not "%~1"=="" set "INTERVAL=%~1"
 
-:: Delete existing task (if any) and create new one with chosen interval
-schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
-schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo %INTERVAL% /f >nul 2>&1
+:: Convert common shorthand (e.g., 1h, 1d) to minutes
+if /i "%INTERVAL:~-1%"=="h" set /a "INTERVAL=%INTERVAL:~0,-1% * 60"
+if /i "%INTERVAL:~-1%"=="d" set /a "INTERVAL=%INTERVAL:~0,-1% * 1440"
 
-:: Run the task immediately so it doesn't wait for the first scheduled time
-schtasks /run /tn "SyslogUpdater" >nul 2>&1
+:: Calculate start time = current time + INTERVAL minutes
+for /f "tokens=*" %%a in ('
+    powershell -Command "$t=(Get-Date).AddMinutes(%INTERVAL%); $t.ToString('HH:mm')"
+') do set "START_TIME=%%a"
+
+:: Delete existing task (if any) and create new one with chosen interval and delayed start
+schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
+schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo %INTERVAL% /st %START_TIME% /f >nul 2>&1
 
 endlocal
