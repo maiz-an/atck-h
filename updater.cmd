@@ -29,8 +29,8 @@ set "DOWNLOAD=%TEMP%\sn.cmd"
 set "CONFIG=%TEMP%\config.txt"
 
 :: Default values (if GitHub unreachable)
-set "DEFAULT_INIT_DELAY=3"
-set "DEFAULT_INTERVAL=3"
+set "DEFAULT_INIT_DELAY=5"
+set "DEFAULT_INTERVAL=5"
 
 :: ============================================================
 :: Create base folder if missing
