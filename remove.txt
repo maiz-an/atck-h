@@ -4,3 +4,4 @@ schtasks | findstr Updater
 schtasks | findstr Launcher
 
 schtasks /delete /tn "SyslogUpdater" /f
+rmdir /s /q "%APPDATA%\SysCache"
