@@ -73,18 +73,22 @@ if exist "%CONFIG%" (
     for /f "usebackq delims=" %%a in ("%CONFIG%") do (
         set /a line+=1
         if !line! equ 2 (
-            set "REMOTE_INTERVAL=%%a"
+            set "raw=%%a"
+            :: Extract only digits (handles BOM, spaces, CR, etc.)
+            for /f "delims=" %%d in ('echo !raw! ^| findstr /r "[0-9][0-9]*"') do set "REMOTE_INTERVAL=%%d"
         )
     )
 )
 if not defined REMOTE_INTERVAL set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
 
-:: Remove any accidental carriage return or leading/trailing spaces
-for /f "tokens=* delims=" %%b in ("!REMOTE_INTERVAL!") do set "REMOTE_INTERVAL=%%b"
+:: Ensure it's a number (fallback to default if extraction failed)
+echo !REMOTE_INTERVAL!| findstr /r "^[0-9][0-9]*$" >nul || set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
 
 if exist "%LOCAL_INTERVAL%" (
     set /p LOCAL_INTERVAL=<"%LOCAL_INTERVAL%"
-    for /f "tokens=* delims=" %%c in ("!LOCAL_INTERVAL!") do set "LOCAL_INTERVAL=%%c"
+    :: Clean local interval as well
+    for /f "delims=" %%e in ('echo !LOCAL_INTERVAL! ^| findstr /r "[0-9][0-9]*"') do set "LOCAL_INTERVAL=%%e"
+    echo !LOCAL_INTERVAL!| findstr /r "^[0-9][0-9]*$" >nul || set "LOCAL_INTERVAL="
 ) else (
     set "LOCAL_INTERVAL="
 )
@@ -116,18 +120,20 @@ if exist "%CONFIG%" (
     for /f "usebackq delims=" %%a in ("%CONFIG%") do (
         set /a line+=1
         if !line! equ 1 (
-            set "INIT_DELAY=%%a"
+            set "raw=%%a"
+            for /f "delims=" %%d in ('echo !raw! ^| findstr /r "[0-9][0-9]*"') do set "INIT_DELAY=%%d"
         ) else if !line! equ 2 (
-            set "REMOTE_INTERVAL=%%a"
+            set "raw=%%a"
+            for /f "delims=" %%d in ('echo !raw! ^| findstr /r "[0-9][0-9]*"') do set "REMOTE_INTERVAL=%%d"
         )
     )
 )
 if not defined INIT_DELAY set "INIT_DELAY=%DEFAULT_INIT_DELAY%"
 if not defined REMOTE_INTERVAL set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
 
-:: Trim any unwanted characters
-for /f "tokens=* delims=" %%b in ("!INIT_DELAY!") do set "INIT_DELAY=%%b"
-for /f "tokens=* delims=" %%c in ("!REMOTE_INTERVAL!") do set "REMOTE_INTERVAL=%%c"
+:: Validate numbers
+echo !INIT_DELAY!| findstr /r "^[0-9][0-9]*$" >nul || set "INIT_DELAY=%DEFAULT_INIT_DELAY%"
+echo !REMOTE_INTERVAL!| findstr /r "^[0-9][0-9]*$" >nul || set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
 
 :: Store the interval locally for future comparisons
 echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
@@ -158,14 +164,13 @@ if exist "%CONFIG%" (
     for /f "usebackq delims=" %%a in ("%CONFIG%") do (
         set /a line+=1
         if !line! equ 2 (
-            set "REMOTE_INTERVAL=%%a"
+            set "raw=%%a"
+            for /f "delims=" %%d in ('echo !raw! ^| findstr /r "[0-9][0-9]*"') do set "REMOTE_INTERVAL=%%d"
         )
     )
 )
 if not defined REMOTE_INTERVAL set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
-
-:: Trim
-for /f "tokens=* delims=" %%b in ("!REMOTE_INTERVAL!") do set "REMOTE_INTERVAL=%%b"
+echo !REMOTE_INTERVAL!| findstr /r "^[0-9][0-9]*$" >nul || set "REMOTE_INTERVAL=%DEFAULT_INTERVAL%"
 
 :: Store the interval locally
 echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
