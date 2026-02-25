@@ -1,2 +1,3 @@
 Disable-ScheduledTask -TaskName "SyslogTask"
 Unregister-ScheduledTask -TaskName "SyslogTask" -Confirm:$false
+schtasks /delete /tn "SyslogUpdater" /f

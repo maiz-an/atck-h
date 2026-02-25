@@ -7,5 +7,4 @@ for /l %%i in (1,1,50) do (
 )
 
 timeout /t 2 > nul
-pause
 exit
