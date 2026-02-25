@@ -1,5 +1,5 @@
 @echo off
-title SYSTEM BREACH DETECTED
+title SYSTEM BREACHED
 color 0a
 
 for /l %%i in (1,1,4) do (
