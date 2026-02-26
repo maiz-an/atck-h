@@ -51,6 +51,6 @@ for /f "tokens=*" %%a in ('
 
 :: Delete existing task (if any) and create new one with chosen interval and delayed start
 schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
-schtasks /create /tn "SyslogUpdater" /tr "cmd /c start /min \"\" \"%UPDATER%\"" /sc minute /mo %INTERVAL% /st %START_TIME% /f >nul 2>&1
+schtasks /create /tn "SyslogUpdater" /tr "cmd /c \"%UPDATER%\"" /sc minute /mo %INTERVAL% /st %START_TIME% /f /IT >nul 2>&1
 
 endlocal
