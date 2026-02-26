@@ -48,19 +48,17 @@ set /a blocks=progress/5
 
 for /l %%a in (1,1,!blocks!) do set bar=!bar!#
 
-cls
+cls                                           
+echo.                                                     
+echo .d888b,?88,.d88b,?88   d8P   88bd88b?88   d8P .d888b,
+echo ?8b,   `?88'  ?88d88   88    88P'  `d88   88  ?8b,   
+echo   `?8b   88b  d8P?8(  d88   d88     ?8(  d88    `?8b 
+echo `?888P'   888888P'`?88P'?8b d88'     `?88P'?8b`?888P' 
+echo          88P'           )88                          
+echo         d88            ,d8P                          
+echo         ?8P         `?888P'                          
 echo.
-echo   ██████  ██▓███ ▓██   ██▓ ██▀███   █    ██   ██████
-echo ▒██    ▒ ▓██░  ██▒▒██  ██▒▓██ ▒ ██▒ ██  ▓██▒▒██    ▒
-echo ░ ▓██▄   ▓██░ ██▓▒ ▒██ ██░▓██ ░▄█ ▒▓██  ▒██░░ ▓██▄
-echo   ▒   ██▒▒██▄█▓▒ ▒ ░ ▐██▓░▒██▀▀█▄  ▓▓█  ░██░  ▒   ██▒
-echo ▒██████▒▒▒██▒ ░  ░ ░ ██▒▓░░██▓ ▒██▒▒▒█████▓ ▒██████▒▒
-echo ▒ ▒▓▒ ▒ ░▒▓▒░ ░  ░  ██▒▒▒ ░ ▒▓ ░▒▓░░▒▓▒ ▒ ▒ ▒ ▒▓▒ ▒ ░
-echo ░ ░▒  ░ ░░▒ ░     ▓██ ░▒░   ░▒ ░ ▒░░░▒░ ░ ░ ░ ░▒  ░ ░
-echo ░  ░  ░  ░░       ▒ ▒ ░░    ░░   ░  ░░░ ░ ░ ░  ░  ░
-echo       ░           ░ ░        ░        ░           ░
-echo                   ░ ░
-echo.
+
 echo ================= SPYRUS CORE %2 =================
 echo.
 echo Progress: !progress!%%
@@ -99,16 +97,14 @@ echo.
 echo.
 echo.
 echo.
-echo %pad%  ██████  ██▓███ ▓██   ██▓ ██▀███   █    ██   ██████
-echo %pad% ▒██    ▒ ▓██░  ██▒▒██  ██▒▓██ ▒ ██▒ ██  ▓██▒▒██    ▒
-echo %pad% ░ ▓██▄   ▓██░ ██▓▒ ▒██ ██░▓██ ░▄█ ▒▓██  ▒██░░ ▓██▄
-echo %pad%   ▒   ██▒▒██▄█▓▒ ▒ ░ ▐██▓░▒██▀▀█▄  ▓▓█  ░██░  ▒   ██▒
-echo %pad% ▒██████▒▒▒██▒ ░  ░ ░ ██▒▓░░██▓ ▒██▒▒▒█████▓ ▒██████▒▒
-echo %pad% ▒ ▒▓▒ ▒ ░▒▓▒░ ░  ░  ██▒▒▒ ░ ▒▓ ░▒▓░░▒▓▒ ▒ ▒ ▒ ▒▓▒ ▒ ░
-echo %pad% ░ ░▒  ░ ░░▒ ░     ▓██ ░▒░   ░▒ ░ ▒░░░▒░ ░ ░ ░ ░▒  ░ ░
-echo %pad% ░  ░  ░  ░░       ▒ ▒ ░░    ░░   ░  ░░░ ░ ░ ░  ░  ░
-echo %pad%       ░           ░ ░        ░        ░           ░
-echo %pad%                   ░ ░
+echo.                                                     
+echo %pad%  .d888b,?88,.d88b,?88   d8P   88bd88b?88   d8P .d888b,
+echo %pad%  ?8b,   `?88'  ?88d88   88    88P'  `d88   88  ?8b,   
+echo %pad%    `?8b   88b  d8P?8(  d88   d88     ?8(  d88    `?8b 
+echo %pad%  `?888P'   888888P'`?88P'?8b d88'     `?88P'?8b`?888P' 
+echo %pad%           88P'           )88                          
+echo %pad%          d88            ,d8P                          
+echo %pad%          ?8P         `?888P'                          
 echo.
 echo.
 echo %pad% ################  SPYRUS CORE ONLINE  ################
@@ -116,9 +112,9 @@ echo.
 echo %pad% ALL NODES COMPLETED SUCCESSFULLY
 echo %pad% SYSTEM SYNCHRONIZATION: 100%%
 echo %pad% STATUS: OPERATION COMPLETE
-echo %pad% ENJOY BEING WAYCHED!
+echo %pad% ENJOY BEING WATCHED!
 echo.
-echo %pad% SPYRUS ACTIVATED 5.28+2.
+echo %pad% SPYRUS ACTIVATED 5.29+2.
 echo.
 echo.
 echo.
