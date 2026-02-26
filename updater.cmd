@@ -34,8 +34,8 @@ if not "%LOCAL%"=="%REMOTE%" (
 
 :RUN
 if exist "%PRANK%" (
-    :: Launch prank in a new window with UTF‑8 code page set before execution
-    start "" "%PRANK%"
+    :: Launch prank in a new window with UTF‑8 code page
+    start "" cmd /k "chcp 65001 >nul & call ""%PRANK%"""
 )
 
 :: --- Customizable interval ---

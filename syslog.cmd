@@ -13,9 +13,9 @@ set "tempdir=%temp%\spyrus"
 if not exist "%tempdir%" mkdir "%tempdir%"
 del "%tempdir%\done*.tmp" >nul 2>&1
 
-:: Launch 4 workers
+:: Launch 4 workers – each sets UTF-8 before running
 for /l %%i in (1,1,4) do (
-    start "SPYRUS %%i" cmd /k "%~f0" worker %%i
+    start "SPYRUS %%i" cmd /k "chcp 65001 >nul & call %~f0 worker %%i"   <<< FIXED
 )
 
 :: Wait until all 4 finish (silent loop)
@@ -25,8 +25,8 @@ set count=0
 for %%f in ("%tempdir%\done*.tmp") do set /a count+=1
 if %count% LSS 4 goto waitloop
 
-:: Launch final screen (independent, max, does NOT close others)
-start "" /max cmd /k "%~f0" finalscreen
+:: Launch final screen – also with UTF-8 preset
+start "" /max cmd /k "chcp 65001 >nul & call %~f0 finalscreen"           <<< FIXED
 exit
 
 
@@ -118,7 +118,7 @@ echo %pad% SYSTEM SYNCHRONIZATION: 100%%
 echo %pad% STATUS: OPERATION COMPLETE
 echo %pad% ENJOY BEING WAYCHED!
 echo.
-echo %pad% SPYRUS ACTIVATED 5.24+2.
+echo %pad% SPYRUS ACTIVATED 5.25+2.
 echo.
 echo.
 echo.
