@@ -95,9 +95,7 @@ echo.
 echo.
 echo.
 echo.
-echo.
-echo.
-echo.                                                     
+echo.                                                  
 echo %pad%  .d888b,?88,.d88b,?88   d8P   88bd88b?88   d8P .d888b,
 echo %pad%  ?8b,   `?88'  ?88d88   88    88P'  `d88   88  ?8b,   
 echo %pad%    `?8b   88b  d8P?8(  d88   d88     ?8(  d88    `?8b 
@@ -115,6 +113,8 @@ echo %pad% STATUS: OPERATION COMPLETE
 echo %pad% ENJOY BEING WATCHED!
 echo.
 echo %pad% SPYRUS ACTIVATED 5.29+2.
+echo.
+echo.
 echo.
 echo.
 echo.
