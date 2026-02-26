@@ -15,7 +15,7 @@ del "%tempdir%\done*.tmp" >nul 2>&1
 
 :: Launch 4 workers
 for /l %%i in (1,1,4) do (
-    start "SPYRUS NODE %%i" cmd /k "%~f0" worker %%i
+    start "SPYRUS %%i" cmd /k "%~f0" worker %%i
 )
 
 :: Wait until all 4 finish (silent loop)
@@ -34,7 +34,7 @@ exit
 :worker
 chcp 65001 >nul
 color 0c
-title SPYRUS CORE
+title SPYRUS
 mode con: cols=110 lines=35
 cls
 
@@ -61,7 +61,7 @@ echo ░  ░  ░  ░░       ▒ ▒ ░░    ░░   ░  ░░░ ░ �
 echo       ░           ░ ░        ░        ░           ░
 echo                   ░ ░
 echo.
-echo ================= SPYRUS NODE %2 =================
+echo ================= SPYRUS CORE %2 =================
 echo.
 echo Progress: !progress!%%
 echo [!bar!]
@@ -119,10 +119,6 @@ echo %pad% STATUS: OPERATION COMPLETE
 echo %pad% ENJOY BEING WAYCHED!
 echo.
 echo %pad% SPYRUS ACTIVATED.
-echo.
-echo.
-echo.
-echo.
 echo.
 echo.
 echo.
