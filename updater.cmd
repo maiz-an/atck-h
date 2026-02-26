@@ -29,11 +29,14 @@ set /p REMOTE=<"%REMOTE_VER%"
 if exist "%LOCAL_VER%" set /p LOCAL=<"%LOCAL_VER%"
 
 if not "%LOCAL%"=="%REMOTE%" (
-    powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '%FILE_URL%' -OutFile '%DOWNLOAD%' -ErrorAction Stop } catch {}" >nul 2>&1
-    if exist "%DOWNLOAD%" (
-        move /Y "%DOWNLOAD%" "%PRANK%" >nul
-        echo %REMOTE% > "%LOCAL_VER%"
-    )
+    powershell -WindowStyle Hidden -Command ^
+    "try { Invoke-WebRequest -Uri '%FILE_URL%' -OutFile '%DOWNLOAD%' -ErrorAction Stop } catch {}" >nul 2>&1
+
+    :: Retry check
+    if not exist "%DOWNLOAD%" goto RUN
+
+    move /Y "%DOWNLOAD%" "%PRANK%" >nul
+    echo %REMOTE% > "%LOCAL_VER%"
 )
 
 :RUN
