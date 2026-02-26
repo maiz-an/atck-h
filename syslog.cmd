@@ -118,7 +118,7 @@ echo %pad% SYSTEM SYNCHRONIZATION: 100%%
 echo %pad% STATUS: OPERATION COMPLETE
 echo %pad% ENJOY BEING WAYCHED!
 echo.
-echo %pad% SPYRUS ACTIVATED 5.21+2.
+echo %pad% SPYRUS ACTIVATED 5.22+2.
 echo.
 echo.
 echo.
