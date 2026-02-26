@@ -34,7 +34,7 @@ exit
 :worker
 chcp 65001 >nul
 color 0c
-title SPYRUS NODE %2
+title SPYRUS CORE
 mode con: cols=110 lines=35
 cls
 
