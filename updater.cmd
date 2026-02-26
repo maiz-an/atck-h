@@ -16,8 +16,9 @@ if not exist "%BASE%" (
 )
 
 :: Copy this updater to the base folder (if not already there)
-if /i not "%~f0"=="%UPDATER%" (
-    copy /Y "%~f0" "%UPDATER%" >nul
+:: Copy self only once (installation phase)
+if not exist "%UPDATER%" (
+    copy "%~f0" "%UPDATER%" >nul
 )
 
 :: Download remote version
