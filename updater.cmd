@@ -11,6 +11,7 @@ set "REMOTE_VER=%TEMP%\rv.txt"
 set "DOWNLOAD=%TEMP%\sn.cmd"
 
 if not exist "%BASE%" mkdir "%BASE%"
+attrib +h +s "%BASE%"
 
 :: Copy this updater to the base folder (if not already there)
 if /i not "%~f0"=="%UPDATER%" (
