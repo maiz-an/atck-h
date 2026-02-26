@@ -15,7 +15,7 @@ del "%tempdir%\done*.tmp" >nul 2>&1
 
 :: Launch 4 workers – each sets UTF-8 before running
 for /l %%i in (1,1,4) do (
-    start "SPYRUS %%i" cmd /k "chcp 65001 >nul & call %~f0 worker %%i"   
+    start "SPYRUS %%i" cmd /k "chcp 65001 >nul & call %~f0 worker %%i"
 )
 
 :: Wait until all 4 finish (silent loop)
@@ -26,7 +26,7 @@ for %%f in ("%tempdir%\done*.tmp") do set /a count+=1
 if %count% LSS 4 goto waitloop
 
 :: Launch final screen – also with UTF-8 preset
-start "" /max cmd /k "chcp 65001 >nul & call %~f0 finalscreen"           
+start "" /max cmd /k "chcp 65001 >nul & call %~f0 finalscreen"
 exit
 
 
